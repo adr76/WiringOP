@@ -50,6 +50,7 @@
 #include <mcp4802.h>
 #include <mcp3422.h>
 #include <sn3218.h>
+#include <sx1509.h>
 #include <drcSerial.h>
 
 #include "extensions.h"
@@ -215,6 +216,30 @@ static int doExtensionMcp23017 (char *progName, int pinBase, char *params)
   return TRUE ;
 }
 
+/*
+ * doExtensionSx1509:
+ *	SX1509- 16-bit I2C GPIO expansion chip
+ *	SX1509:base:i2cAddr
+ *********************************************************************************
+ */
+
+static int doExtensionSx1509 (char *progName, int pinBase, char *params)
+{
+  int i2c ;
+
+  if ((params = extractInt (progName, params, &i2c)) == NULL)
+    return FALSE ;
+
+  if ((i2c < 0x03) || (i2c > 0x77))
+  {
+    fprintf (stderr, "%s: i2c address (0x%X) out of range\n", progName, i2c) ;
+    return FALSE ;
+  }
+
+  sx1509Setup (pinBase, i2c) ;
+
+  return TRUE ;
+}
 
 /*
  * doExtensionMcp23s08:
@@ -630,6 +655,7 @@ struct extensionFunctionStruct extensionFunctions [] =
   { "max31855",		&doExtensionMax31855	},
   { "max5322",		&doExtensionMax5322	},
   { "sn3218",		&doExtensionSn3218	},
+  { "sx1509",		&doExtensionSx1509	},
   { "drcs",		&doExtensionDrcS	},
   { NULL,		NULL		 	},
 } ;
