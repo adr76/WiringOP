@@ -11,7 +11,7 @@
 #include "wiringPiI2C.h"
 
 #include "sx1509.h"
-#include "sx1509_includes/sx1509_registers.h"
+// #include "sx1509_includes/sx1509_registers.h"
 
 static void reset(struct wiringPiNodeStruct *node, int hardware)
 {
@@ -229,9 +229,9 @@ static void myDigitalWrite(struct wiringPiNodeStruct *node, int pin, int value)
 	{
         unsigned int tempRegData = wiringPiI2CReadReg16(node->fd, REG_DATA_B);
         if(value)
-            tempRegData &= ~(1<<pin);
-        else
             tempRegData |= (1<<pin);
+        else
+            tempRegData &= ~(1<<pin);
 
         wiringPiI2CWriteReg16(node->fd, REG_DATA_B, tempRegData);
     }
@@ -242,6 +242,10 @@ static void myPWMWrite(struct wiringPiNodeStruct *node, int pin, int value)
 {
     wiringPiI2CWriteReg8(node->fd, REG_I_ON[pin - node->pinBase], value);
 }
+
+//  ******************************************************************************
+//  Export Functions
+//  ******************************************************************************
 
 /*
  * sx1509Setup:
@@ -281,10 +285,10 @@ int sx1509Setup(const int pinBase, const int i2cAddress)
 
 	// If the reset pin is connected
 	// if(resetPin != -1)
-	// Soft Reset Registers
-		reset(node, 1);
+		// reset(node, 1);
 	// else
-		// reset(node, 0);
+	// Soft Reset Registers
+	reset(node, 0);
 
 	// Communication test. We'll read from two registers with different
 	// default values to verify communication.
@@ -295,6 +299,12 @@ int sx1509Setup(const int pinBase, const int i2cAddress)
 		return 0;
 	else
 		return -1;
+}
+
+void sx1509Reset(int pinBase)
+{
+	// Software reset:
+	reset(wiringPiFindNode(pinBase), 0);
 }
 
 void sx1509LEDDriverSetFreq(int pinBase, int freq, int log)
